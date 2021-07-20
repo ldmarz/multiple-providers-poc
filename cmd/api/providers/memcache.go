@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"providers_poc/cmd/api/domain"
 )
@@ -57,7 +58,7 @@ func (m MemCache) WriteCache(pokemon domain.Pokemon) error {
 	reqBodyBytes := new(bytes.Buffer)
 	json.NewEncoder(reqBodyBytes).Encode(pokemon)
 
-	pokemonCache[pokemon.Name] = reqBodyBytes.Bytes()
+	pokemonCache[strings.ToLower(pokemon.Name)] = reqBodyBytes.Bytes()
 
 	return nil
 }

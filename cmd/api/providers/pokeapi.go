@@ -8,7 +8,7 @@ import (
 	"providers_poc/cmd/api/domain"
 )
 
-const baseUrl = "https://pokeapi.co/api/v2/pokemon/"
+const baseUrlPokeAPI = "https://pokeapi.co/api/v2/pokemon/"
 
 type payloadPokeApi struct {
 	Name string `json:"Name"`
@@ -45,7 +45,7 @@ func (pa pokeApi) RetrieveData(requestBody []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	resp, err := http.Get(baseUrl + p.Name)
+	resp, err := http.Get(baseUrlPokeAPI + p.Name)
 	if err != nil {
 		return nil, err
 	}

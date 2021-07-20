@@ -35,10 +35,11 @@ func SelectProvider(next http.Handler) http.Handler {
 func providerBasedOnFlow(flow string) ([]domain.Provider, error) {
 	memCache := providers.NewMemCache()
 	pokeApi := providers.NewPokeApi(memCache)
+	pokeXYZ := providers.NewPokeXYZ(memCache)
 
 	switch flow {
 	case "pokemon":
-		return []domain.Provider{memCache, pokeApi}, nil
+		return []domain.Provider{memCache, pokeXYZ, pokeApi}, nil
 
 	default:
 		return nil, fmt.Errorf("flow not configured")
