@@ -3,15 +3,14 @@ package domain
 import (
 	"context"
 	"errors"
-	"io"
 )
 
 const providerCtxKey ctxKey = "providerCtx"
 
 type Provider interface {
 	GetId() string
-	RetrieveData(requestBody io.ReadCloser) ([]byte, error)
-	AdaptData(data []byte) (Pokemon, error)
+	RetrieveData(requestBody []byte) ([]byte, error)
+	AdaptData(b []byte) (Pokemon, error)
 }
 
 func AppendProviderToCtx(ctx context.Context, provider []Provider) context.Context {

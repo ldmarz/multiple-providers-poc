@@ -9,11 +9,10 @@ import (
 )
 
 type Algo struct {
-
 }
 
 func SelectProvider(next http.Handler) http.Handler {
-	return http.HandlerFunc(func (w http.ResponseWriter, r *http.Request) {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		flow, ok := r.URL.Query()["flow"]
 		if !ok || len(flow[0]) < 1 {
 			http.Error(w, "Flow param is required", 400)
@@ -33,13 +32,15 @@ func SelectProvider(next http.Handler) http.Handler {
 	})
 }
 
-
 func providerBasedOnFlow(flow string) ([]domain.Provider, error) {
-	switch flow {
-		case "pokemon":
-			return []domain.Provider{providers.NewPokeApi()}, nil
+	memCache := providers.NewMemCache()
+	pokeApi := providers.NewPokeApi(memCache)
 
-		default:
-			return nil, fmt.Errorf("flow not configured")
+	switch flow {
+	case "pokemon":
+		return []domain.Provider{memCache, pokeApi}, nil
+
+	default:
+		return nil, fmt.Errorf("flow not configured")
 	}
 }

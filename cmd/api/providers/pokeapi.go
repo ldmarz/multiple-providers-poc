@@ -2,7 +2,6 @@ package providers
 
 import (
 	"encoding/json"
-	"io"
 	"io/ioutil"
 	"net/http"
 
@@ -14,33 +13,36 @@ const baseUrl = "https://pokeapi.co/api/v2/pokemon/"
 type payloadPokeApi struct {
 	Name string `json:"Name"`
 }
+
 type pokeApi struct {
-	ID string
+	ID         string
+	cacheStore WriteInCache
 }
 
 type responsePokeApi struct {
 	Name string `json:"name"`
-	Type []struct{
-		Type struct{
+	Type []struct {
+		Type struct {
 			Name string `json:"name"`
 		} `json:"type"`
 	} `json:"types"`
 }
 
-func NewPokeApi() domain.Provider {
+func NewPokeApi(cacheStore WriteInCache) domain.Provider {
 	return pokeApi{
-		ID: "pokeApi",
+		ID:         "pokeApi",
+		cacheStore: cacheStore,
 	}
 }
 
-func (pa pokeApi) GetId() string{
+func (pa pokeApi) GetId() string {
 	return pa.ID
 }
 
-func (pa pokeApi) RetrieveData(requestBody io.ReadCloser) ([]byte, error) {
+func (pa pokeApi) RetrieveData(requestBody []byte) ([]byte, error) {
 	p := payloadPokeApi{}
-	if err := json.NewDecoder(requestBody).Decode(&p); err != nil {
-		panic(err)
+	if err := json.Unmarshal(requestBody, &p); err != nil {
+		return nil, err
 	}
 
 	resp, err := http.Get(baseUrl + p.Name)
@@ -58,7 +60,6 @@ func (pa pokeApi) RetrieveData(requestBody io.ReadCloser) ([]byte, error) {
 }
 
 func (pa pokeApi) AdaptData(b []byte) (domain.Pokemon, error) {
-
 	var response responsePokeApi
 	if err := json.Unmarshal(b, &response); err != nil {
 		return domain.Pokemon{}, err
@@ -73,6 +74,10 @@ func (pa pokeApi) AdaptData(b []byte) (domain.Pokemon, error) {
 		pokemon.Type = append(pokemon.Type, v.Type.Name)
 	}
 
+	err := pa.cacheStore.WriteCache(pokemon)
+	if err != nil {
+		return domain.Pokemon{}, err
+	}
+
 	return pokemon, nil
 }
-
